@@ -3,5 +3,5 @@
   gather_facts: yes
   become: yes
   roles:
-    - global
-    - gnome
+    - { role: global, tags: global }
+    - { role: gnome, tags: gnome }

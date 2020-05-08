@@ -49,8 +49,43 @@
       - vim
       - wget
       - python-pip
+      - make
+      - gcc
+      - unzip
 
 - name: Install non repo packages
   apt:
     deb: "https://downloads.slack-edge.com/linux_releases/slack-desktop-4.4.2-amd64.deb"
   ignore_errors: yes
+
+- name: Install lastpass-cli dependencies
+  apt:
+    pkg:
+      - bash-completion
+      - build-essential
+      - cmake
+      - libcurl4
+      - libcurl4-openssl-dev
+      - libssl-dev
+      - libxml2
+      - libxml2-dev
+      - libssl1.1
+      - pkg-config
+      - ca-certificates
+      - xclip
+
+- name: Get lastpass-cli repo
+  git:
+    repo: "https://github.com/lastpass/lastpass-cli.git"
+    dest: "{{ ansible_env.HOME }}/lastpass-cli"
+    version: "v{{ lastpass_version }}"
+  become: no
+
+- name: Make lastpass-cli
+  make:
+    chdir: "{{ ansible_env.HOME }}/lastpass-cli"
+
+- name: Make install lastpass-cli
+  make:
+    chdir: "{{ ansible_env.HOME }}/lastpass-cli"
+    target: install

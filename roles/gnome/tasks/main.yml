@@ -3,19 +3,56 @@
   setup:
   become: no
 
+- name: Ensure themes directory exists
+  file:
+    path: "{{ ansible_env.HOME }}/.themes"
+    owner: "{{ ansible_env.USER }}"
+    group: "{{ ansible_env.USER }}"
+
+- name: Download Prof Light theme
+  get_url:
+    url: https://dllb2.pling.com/api/files/download/j/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjE1ODgyNjY2MzciLCJ1IjpudWxsLCJsdCI6ImRvd25sb2FkIiwicyI6ImQ4ODdjYzBmMzcyMjcyZjI1ZDk4ZGMxYzcxYjFmMzMzOTQxYmQyMjY2ZTViOTM3ODU5ZmI4MzJjOGI5ODA2NjE3ODVhNjY5ZjQ4OWY4MzhhMDdiYzUwY2JiNDU4MjJmMTI4ZTc3YWQ2ZTU2ZWMxMGViZGIxZGMwY2M5ZmE4ZGZlIiwidCI6MTU4ODk3MzY3MSwic3RmcCI6IjFjZThmMjkzZjc2ZDI3NzVhNDk3NjdlNmYyMDVkMzQyIiwic3RpcCI6IjI2MDE6MjgxOjgzMDA6NDU1MDplNTQyOmViZjg6MTY5ZjoyNmI3In0.F9UiiP63Byi8jjaPIGc861TQDunDzXlx2AJAbMJQuek/Prof-Gnome-Light-DS-3.4.1.tar.xz
+    dest: /tmp/
+  register: prof_tar
+
+- name: Unarchive Prof Light theme
+  unarchive:
+    src: "{{ prof_tar.dest }}"
+    dest: "{{ ansible_env.HOME }}/.themes"
+  register: prof_unarchive
+
 - name: Download background image
   get_url:
     url: http://getwallpapers.com/wallpaper/full/9/9/f/14529.jpg
     dest: "{{ ansible_env.HOME }}/Documents/wallpaper.jpg"
   register: background_image
   become: no
+
+- name: Install Paper icons repo
+  apt_repository:
+    repo: ppa:snwh/ppa
+
+- name: Install Paper icons
+  apt:
+    pkg: paper-icon-theme
+
+- name: Install extensions
+  gnome_shell_extension:
+    id: "{{ item }}"
+    gnome_extension_path: "{{ ansible_env.HOME }}/.local/share/gnome-shell/extensions/"
+  loop:
+    - 28
+    - 1160
+    - 19
+  become: no
+
 - name: Set gnome settings
   become: no
   block:
     - name: Set background image
       dconf:
         key: "/org/gnome/desktop/background/picture-uri"
-        value: "'file:///home/kannis/Documents/wallpaper.jpg'"
+        value: "'file://{{ ansible_env.HOME }}/Documents/wallpaper.jpg'"
 
     - name: Set dock favorites
       dconf:
@@ -31,3 +68,16 @@
       dconf:
         key: "/org/gnome/desktop/interface/show-battery-percentage"
         value: "true"
+
+    - name: Set paper-icons
+      dconf:
+        key: "/org/gnome/desktop/interface/{{ item }}"
+        value: "'Paper'"
+      loop:
+        - icon-theme
+        - cursor-theme
+
+    - name: Set Prof Light theme
+      dconf:
+        key: "/org/gnome/desktop/interface/gtk-theme"
+        value: "'{{ prof_tar.dest | basename | splitext | first | splitext | first }}'"

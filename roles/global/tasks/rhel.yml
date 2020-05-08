@@ -1,0 +1,36 @@
+- name: Update latest packages
+  dnf:
+    name: "*"
+    state: latest
+    update_cache: yes
+
+- name: Install common packages
+  dnf:
+    update_cache: yes
+    name:
+      - konsole
+      - git
+      - network-manager-openvpn
+      - network-manager-openvpn-gnome
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg-agent
+      - software-properties-common
+      - gnome-tweaks
+      - gnome-shell-extensions
+      - zeal
+      - python-psutil
+      - google-chrome-stable
+      - atom
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - forticlient
+      - vim
+      - wget
+      - python-pip
+      - make
+      - gcc
+      - lastpass-cli
+      - unzip
