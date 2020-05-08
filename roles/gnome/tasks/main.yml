@@ -1,0 +1,33 @@
+---
+- name: Gather facts as playbook executor
+  setup:
+  become: no
+
+- name: Download background image
+  get_url:
+    url: http://getwallpapers.com/wallpaper/full/9/9/f/14529.jpg
+    dest: "{{ ansible_env.HOME }}/Documents/wallpaper.jpg"
+  register: background_image
+  become: no
+- name: Set gnome settings
+  become: no
+  block:
+    - name: Set background image
+      dconf:
+        key: "/org/gnome/desktop/background/picture-uri"
+        value: "'file:///home/kannis/Documents/wallpaper.jpg'"
+
+    - name: Set dock favorites
+      dconf:
+        key: "/org/gnome/shell/favorite-apps"
+        value: "['google-chrome.desktop', 'org.gnome.Nautilus.desktop', 'org.kde.konsole.desktop', 'slack_slack.desktop', 'atom_atom.desktop', 'zeal.desktop', 'org.gnome.tweaks.desktop']"
+
+    - name: Change caps to ctrl
+      dconf:
+        key: "/org/gnome/desktop/input-sources/xkb-options"
+        value: "['caps:ctrl_modifier']"
+
+    - name: Show battery percentage
+      dconf:
+        key: "/org/gnome/desktop/interface/show-battery-percentage"
+        value: "true"

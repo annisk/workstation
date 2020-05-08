@@ -1,0 +1,106 @@
+---
+
+- name: Include ubuntu
+  include: ubuntu.yml
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Include rhel
+  include: rhel.yml
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Gather facts
+  setup:
+  become: no
+  
+- name: add user to docker group
+  user:
+    name: "{{ ansible_env.USER }}"
+    groups: docker
+    append: yes
+  become: yes
+
+- name: Ensure docker daemon is running
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Add default Konsole profile
+  copy:
+    src: default.profile
+    dest: "{{ ansible_env.HOME }}/.local/share/konsole/default.profile"
+    owner: "{{ ansible_env.USER }}"
+    group: "{{ ansible_env.USER }}"
+    mode: 0600
+  become: "no"
+
+- name: Clone asdf
+  git:
+    repo: "https://github.com/asdf-vm/asdf.git"
+    dest: "{{ ansible_env.HOME }}/.asdf"
+    version: "v{{ asdf_version }}"
+  become: no
+
+- name: Enable asdf
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    line: ". $HOME/.asdf/asdf.sh"
+
+- name: Add asdf plugins
+  command: "{{ ansible_env.HOME }}/.asdf/bin/asdf plugin-add {{ item.tool }} {{ item.plugin }}"
+  args:
+    creates: "{{ ansible_env.HOME }}/.asdf/plugins/{{ item.tool }}"
+  loop:
+    - tool: kubectl
+      plugin: https://github.com/Banno/asdf-kubectl.git
+    - tool: helm
+      plugin: https://github.com/Antiarchitect/asdf-helm.git
+    - tool: terraform
+      plugin: https://github.com/Banno/asdf-hashicorp.git
+    - tool: terragrunt
+      plugin: https://github.com/lotia/asdf-terragrunt.git
+  become: no
+
+- name: Check if aws cli installed
+  stat:
+    path: /usr/local/bin/aws
+  register: awscli
+
+- block:
+  - name: Get aws cli
+    get_url:
+      url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+      dest: /tmp/awscliv2.zip
+
+  - name: Unzip awscli
+    unarchive:
+      src: /tmp/awscliv2.zip
+      dest: /tmp
+
+  - name: Install awscli
+    command: /tmp/aws/install
+  when: not awscli.stat.exists
+
+- name: Check if saml2aws installed
+  stat:
+    path: /usr/local/bin/saml2aws
+  register: saml2aws
+
+- block:
+  - name: Download saml2aws
+    get_url:
+      url: "https://github.com/Versent/saml2aws/releases/download/v{{ saml2aws_version }}/saml2aws_{{ saml2aws_version }}_linux_amd64.tar.gz"
+      dest: /tmp/saml2aws.tar.gz
+
+  - name: Unarchive saml2aws
+    unarchive:
+      src: /tmp/saml2aws.tar.gz
+      dest: /tmp
+
+  - name: Move saml2aws
+    copy:
+      remote_src: yes
+      src: /tmp/saml2aws
+      dest: /usr/local/bin/saml2aws
+      mode: 0777
+  when: not saml2aws.stat.exists
