@@ -6,20 +6,21 @@
 - name: Ensure themes directory exists
   file:
     path: "{{ ansible_env.HOME }}/.themes"
+    state: directory
     owner: "{{ ansible_env.USER }}"
     group: "{{ ansible_env.USER }}"
 
-- name: Download Prof Light theme
-  get_url:
-    url: https://dllb2.pling.com/api/files/download/j/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjE1ODgyNjY2MzciLCJ1IjpudWxsLCJsdCI6ImRvd25sb2FkIiwicyI6ImQ4ODdjYzBmMzcyMjcyZjI1ZDk4ZGMxYzcxYjFmMzMzOTQxYmQyMjY2ZTViOTM3ODU5ZmI4MzJjOGI5ODA2NjE3ODVhNjY5ZjQ4OWY4MzhhMDdiYzUwY2JiNDU4MjJmMTI4ZTc3YWQ2ZTU2ZWMxMGViZGIxZGMwY2M5ZmE4ZGZlIiwidCI6MTU4ODk3MzY3MSwic3RmcCI6IjFjZThmMjkzZjc2ZDI3NzVhNDk3NjdlNmYyMDVkMzQyIiwic3RpcCI6IjI2MDE6MjgxOjgzMDA6NDU1MDplNTQyOmViZjg6MTY5ZjoyNmI3In0.F9UiiP63Byi8jjaPIGc861TQDunDzXlx2AJAbMJQuek/Prof-Gnome-Light-DS-3.4.1.tar.xz
-    dest: /tmp/
-  register: prof_tar
+- name: Download Prof Light DS theme
+  git:
+    repo: "https://github.com/paullinuxthemer/Prof-Gnome.git"
+    dest: /tmp/Prof-Gnome
 
-- name: Unarchive Prof Light theme
-  unarchive:
-    src: "{{ prof_tar.dest }}"
-    dest: "{{ ansible_env.HOME }}/.themes"
-  register: prof_unarchive
+- name: Move theme into themes dir
+  copy:
+    src: /tmp/Prof-Gnome/Prof-Gnome-Light-DS-3.4.1
+    dest: "{{ ansible_env.HOME }}/.themes/"
+    remote_src: yes
+  register: prof_theme
 
 - name: Download background image
   get_url:
@@ -28,13 +29,31 @@
   register: background_image
   become: no
 
-- name: Install Paper icons repo
-  apt_repository:
-    repo: ppa:snwh/ppa
+- name: Install Paper icons (Ubuntu)
+  block:
+    - name: Install Paper icons repo
+      apt_repository:
+        repo: ppa:snwh/ppa
 
-- name: Install Paper icons
-  apt:
-    pkg: paper-icon-theme
+    - name: Install Paper icons
+      apt:
+        pkg: paper-icon-theme
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Install Paper icons (RHEL)
+  block:
+    - name: Install Paper icons
+      dnf:
+        name: https://download.opensuse.org/repositories/home:/snwh:/paper/Fedora_25/noarch/paper-icon-theme-1.3.git+1475704478.00b1750-9.1.noarch.rpm
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Ensure extensions directory exists
+  file:
+    path: "{{ ansible_env.HOME }}/.local/share/gnome-shell/extensions/"
+    state: directory
+    owner: "{{ ansible_env.USER }}"
+    group: "{{ ansible_env.USER }}"
+    mode: 0775
 
 - name: Install extensions
   gnome_shell_extension:
@@ -80,4 +99,4 @@
     - name: Set Prof Light theme
       dconf:
         key: "/org/gnome/desktop/interface/gtk-theme"
-        value: "'{{ prof_tar.dest | basename | splitext | first | splitext | first }}'"
+        value: "'{{ prof_theme.dest | basename }}'"

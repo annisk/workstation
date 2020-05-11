@@ -19,8 +19,8 @@ if [[ -f /etc/lsb-release ]]; then
   PKGREPO="apt-add-repository"
 elif [[ -f /etc/redhat-release ]]; then
   OS_DISTRO="redhat";
-  VERSION=$(lsb_release -a | grep Release | awk '{ print $2 }' | cut -d. -f1)
-  if [[ $VERSION == "8" ]]; then
+  source /etc/os-release
+  if [[ $VERSION_ID == "8" ]]; then
     PKG="dnf";
   else
     PKG="yum";

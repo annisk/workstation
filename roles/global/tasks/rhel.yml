@@ -4,32 +4,41 @@
     state: latest
     update_cache: yes
 
+- name: Install required repos
+  yum_repository:
+    name: "{{ item.name }}"
+    baseurl: "{{ item.baseurl }}"
+    description: "{{ item.name }}"
+    gpgkey: "{{ item.gpgkey }}"
+  loop:
+    - { name: "Atom-Editor", baseurl: "https://packagecloud.io/AtomEditor/atom/el/7/$basearch", gpgkey: "https://packagecloud.io/AtomEditor/atom/gpgkey" }
+    - { name: "Google-Chrome", baseurl: "http://dl.google.com/linux/chrome/rpm/stable/$basearch", gpgkey: "https://dl-ssl.google.com/linux/linux_signing_key.pub" }
+    - { name: "Fortinet-Client", baseurl: "https://repo.fortinet.com/repo/centos/7/os/x86_64", gpgkey: "https://repo.fortinet.com/repo/centos/7/os/x86_64/RPM-GPG-KEY" }
+
+
 - name: Install common packages
   dnf:
     update_cache: yes
     name:
+      - epel-release
       - konsole
       - git
-      - network-manager-openvpn
-      - network-manager-openvpn-gnome
-      - apt-transport-https
+      - NetworkManager-openvpn
+      - NetworkManager-openvpn-gnome
       - ca-certificates
       - curl
-      - gnupg-agent
-      - software-properties-common
       - gnome-tweaks
-      - gnome-shell-extensions
-      - zeal
-      - python-psutil
+      - gnome-shell-extension-common
+        #- zeal
+      - python3-psutil
       - google-chrome-stable
       - atom
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
+        #- docker-ce
+        #- docker-ce-cli
+        #- containerd.io
       - forticlient
       - vim
       - wget
-      - python-pip
       - make
       - gcc
       - lastpass-cli

@@ -1,11 +1,11 @@
 ---
 
 - name: Include ubuntu
-  include: ubuntu.yml
+  include_tasks: ubuntu.yml
   when: ansible_distribution == 'Ubuntu'
 
 - name: Include rhel
-  include: rhel.yml
+  include_tasks: rhel.yml
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
 - name: Gather facts
@@ -24,6 +24,13 @@
     name: docker
     state: started
     enabled: yes
+
+- name: Ensure Konsole profile location exists
+  file:
+    path: "{{ ansible_env.HOME }}/.local/share/konsole/"
+    state: directory
+    owner: "{{ ansible_env.USER }}"
+    group: "{{ ansible_env.USER }}"
 
 - name: Add default Konsole profile
   copy:
