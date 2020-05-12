@@ -11,7 +11,7 @@
 - name: Gather facts
   setup:
   become: no
-  
+
 - name: add user to docker group
   user:
     name: "{{ ansible_env.USER }}"
@@ -66,6 +66,8 @@
       plugin: https://github.com/Banno/asdf-hashicorp.git
     - tool: terragrunt
       plugin: https://github.com/lotia/asdf-terragrunt.git
+    - tool: kubectx
+      plugin: https://github.com/trnubo/asdf-kubectx.git
   become: no
 
 - name: Check if aws cli installed

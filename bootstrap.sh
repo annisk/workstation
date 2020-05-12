@@ -18,9 +18,9 @@ if [[ -f /etc/lsb-release ]]; then
   PKG="apt"
   PKGREPO="apt-add-repository"
 elif [[ -f /etc/redhat-release ]]; then
-  OS_DISTRO="redhat";
+  OS_DISTRO="redhat"
   source /etc/os-release
-  if [[ $VERSION_ID == "8" ]]; then
+  if [[ $VERSION_ID == "8" || $ID = "fedora" ]]; then
     PKG="dnf";
   else
     PKG="yum";
