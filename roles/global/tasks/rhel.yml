@@ -15,8 +15,6 @@
     - { name: "Google-Chrome", baseurl: "http://dl.google.com/linux/chrome/rpm/stable/$basearch", gpgkey: "https://dl-ssl.google.com/linux/linux_signing_key.pub" }
     - { name: "Fortinet-Client", baseurl: "https://repo.fortinet.com/repo/centos/7/os/x86_64", gpgkey: "https://repo.fortinet.com/repo/centos/7/os/x86_64/RPM-GPG-KEY" }
 
-
-
 - name: Install common packages
   dnf:
     update_cache: yes
@@ -49,7 +47,7 @@
         description: "{{ item.name }}"
         gpgkey: "{{ item.gpgkey }}"
       loop:
-        - { name: "docker-ce-stable", baseurl: "https://download.docker.com/linux/fedora/31//$basearch/stable", gpgkey: "https://download.docker.com/linux/fedora/gpg" } 
+        - { name: "docker-ce-stable", baseurl: "https://download.docker.com/linux/fedora/31/$basearch/stable", gpgkey: "https://download.docker.com/linux/fedora/gpg" }
       when: ansible_distribution == 'Fedora'
 
     - name: Install fedora only packages

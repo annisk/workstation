@@ -50,7 +50,7 @@
 - name: Install Paper icons (Fedora)
   dnf:
     name: paper-icon-theme
-  when: ansible_distribution == "Fedora'
+  when: ansible_distribution == "Fedora"
 
 - name: Ensure extensions directory exists
   file:
