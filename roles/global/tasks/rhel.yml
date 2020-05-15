@@ -16,11 +16,11 @@
     - { name: "Fortinet-Client", baseurl: "https://repo.fortinet.com/repo/centos/7/os/x86_64", gpgkey: "https://repo.fortinet.com/repo/centos/7/os/x86_64/RPM-GPG-KEY" }
 
 
+
 - name: Install common packages
   dnf:
     update_cache: yes
     name:
-      - epel-release
       - konsole
       - git
       - NetworkManager-openvpn
@@ -29,13 +29,9 @@
       - curl
       - gnome-tweaks
       - gnome-shell-extension-common
-        #- zeal
       - python3-psutil
       - google-chrome-stable
       - atom
-        #- docker-ce
-        #- docker-ce-cli
-        #- containerd.io
       - forticlient
       - vim
       - wget
@@ -43,3 +39,24 @@
       - gcc
       - lastpass-cli
       - unzip
+
+- name: Install fedora only packages
+  block:
+    - name: Install docker repos
+      yum_repository:
+        name: "{{ item.name }}"
+        baseurl: "{{ item.baseurl }}"
+        description: "{{ item.name }}"
+        gpgkey: "{{ item.gpgkey }}"
+      loop:
+        - { name: "docker-ce-stable", baseurl: "https://download.docker.com/linux/fedora/31//$basearch/stable", gpgkey: "https://download.docker.com/linux/fedora/gpg" } 
+      when: ansible_distribution == 'Fedora'
+
+    - name: Install fedora only packages
+      dnf:
+        update_cache: yes
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - zeal

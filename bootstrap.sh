@@ -20,7 +20,7 @@ if [[ -f /etc/lsb-release ]]; then
 elif [[ -f /etc/redhat-release ]]; then
   OS_DISTRO="redhat"
   source /etc/os-release
-  if [[ $VERSION_ID == "8" || $ID = "fedora" ]]; then
+  if [[ $ID == "centos" || $ID = "fedora" ]]; then
     PKG="dnf";
   else
     PKG="yum";
@@ -40,13 +40,12 @@ if [[ $OS_DISTRO == "ubuntu" ]]; then
   sleep 1
   $PKG install software-properties-common &>> $BOOTSTRAP_LOG
   $PKGREPO --yes --update ppa:ansible/ansible &>> $BOOTSTRAP_LOG
-  $PKG install ansible -y &>> $BOOTSTRAP_LOG
-elif [[ $OS_DISTRO == "redhat" ]]; then
+elif [[ $ID == "centos" ]]; then
   $PKG install epel-release -y &>> $BOOTSTRAP_LOG
-  $PKG install ansible -y &>> $BOOTSTRAP_LOG
 fi
-echo -e "\xE2\x9C\x94"
+$PKG install ansible -y &>> $BOOTSTRAP_LOG
 
+echo -e "\xE2\x9C\x94"
 echo "Running ansible"
 
-ansible-playbook setup.yml -K
+ansible-playbook setup.yml -K -v --step

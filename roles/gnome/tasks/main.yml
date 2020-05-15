@@ -17,7 +17,7 @@
 
 - name: Move theme into themes dir
   copy:
-    src: /tmp/Prof-Gnome/Prof-Gnome-Light-DS-3.4.1
+    src: /tmp/Prof-Gnome/Prof-Gnome-Light-DS-3.5
     dest: "{{ ansible_env.HOME }}/.themes/"
     remote_src: yes
   register: prof_theme
@@ -46,6 +46,11 @@
       dnf:
         name: https://download.opensuse.org/repositories/home:/snwh:/paper/Fedora_25/noarch/paper-icon-theme-1.3.git+1475704478.00b1750-9.1.noarch.rpm
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Install Paper icons (Fedora)
+  dnf:
+    name: paper-icon-theme
+  when: ansible_distribution == "Fedora'
 
 - name: Ensure extensions directory exists
   file:
