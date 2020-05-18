@@ -1,0 +1,65 @@
+---
+
+- name: Install and run clamd (ubuntu)
+  block:
+    - name: Install clamav-daemon
+      apt:
+        pkg: clamav-daemon
+
+    - name: Initialize clamdb
+      command: freshclam -v
+
+    - name: Start clamav services
+      systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop:
+        - clamav-daemon
+        - clamav-freshclam
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Install and run clamd (ubuntu)
+  block:
+    - name: Install clamd
+      dnf:
+        name: "{{ item }}"
+      loop:
+        - clamd
+        - clamav
+        - clamav-update
+
+    - name: Set httpd_can_network_connect flag on and keep it persistent across reboots
+      seboolean:
+        name: antivirus_can_scan_system
+        state: yes
+        persistent: yes
+
+    - name: Copy example file
+      copy:
+        src: /etc/clamd.d/scan.conf
+        dest: /etc/clamd.d/service.conf
+        remote_src: yes
+        force: no
+
+    - name: Enable local socket for clamd
+      lineinfile:
+        path: /etc/clamd.d/service.conf
+        regexp: "^#LocalSocket /run/clamd.scan/clamd.sock"
+        line: "LocalSocket /run/clamd.scan/clamd.sock"
+
+    - name: Initialize clamdb
+      command: freshclam -v
+
+    - name: Start clamd services
+      systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop:
+        - clamd@service
+        - clamav-freshclam
+  when: >
+    ansible_distribution == 'CentOS' or
+    ansible_distribution == 'Red Hat Enterprise Linux' or
+    ansible_distribution == 'Fedora'

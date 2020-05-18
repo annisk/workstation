@@ -3,3 +3,29 @@
 saml2aws_version: 2.25.0
 asdf_version: 0.7.8
 lastpass_version: 1.3.3
+
+asdf_tools:
+  - name: kubectl
+    plugin: https://github.com/Banno/asdf-kubectl.git
+    default_version: 1.14.10
+    additional_versions: ['1.13.12']
+  - name: helm
+    plugin: https://github.com/Antiarchitect/asdf-helm.git
+    default_version: 3.2.1
+    additional_versions: ['2.16.7']
+  - name: terraform
+    plugin: https://github.com/Banno/asdf-hashicorp.git
+    default_version: 0.12.25
+    additional_versions: ['0.11.14']
+  - name: terragrunt
+    plugin: https://github.com/lotia/asdf-terragrunt.git
+    default_version: 0.23.18
+    additional_versions: []
+  - name: kubectx
+    plugin: https://github.com/trnubo/asdf-kubectx.git
+    default_version: 0.9.0
+    additional_versions: []
+  - name: minikube
+    plugin: https://github.com/alvarobp/asdf-minikube.git
+    default_version: 1.10.1
+    additional_versions: []

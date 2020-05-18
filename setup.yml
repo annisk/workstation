@@ -5,3 +5,4 @@
   roles:
     - { role: global, tags: global }
     - { role: gnome, tags: gnome }
+    - { role: clamav, tags: clamav }

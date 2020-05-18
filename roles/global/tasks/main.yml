@@ -15,6 +15,12 @@
   setup:
   become: no
 
+- name: Add user to libvirt group
+  user:
+    name: "{{ ansible_env.USER }}"
+    groups: libvirt
+    append: yes
+
 - name: add user to docker group
   user:
     name: "{{ ansible_env.USER }}"
@@ -57,20 +63,19 @@
     line: ". $HOME/.asdf/asdf.sh"
 
 - name: Add asdf plugins
-  command: "{{ ansible_env.HOME }}/.asdf/bin/asdf plugin-add {{ item.tool }} {{ item.plugin }}"
+  command: "{{ ansible_env.HOME }}/.asdf/bin/asdf plugin-add {{ item.name }} {{ item.plugin }}"
   args:
-    creates: "{{ ansible_env.HOME }}/.asdf/plugins/{{ item.tool }}"
-  loop:
-    - tool: kubectl
-      plugin: https://github.com/Banno/asdf-kubectl.git
-    - tool: helm
-      plugin: https://github.com/Antiarchitect/asdf-helm.git
-    - tool: terraform
-      plugin: https://github.com/Banno/asdf-hashicorp.git
-    - tool: terragrunt
-      plugin: https://github.com/lotia/asdf-terragrunt.git
-    - tool: kubectx
-      plugin: https://github.com/trnubo/asdf-kubectx.git
+    creates: "{{ ansible_env.HOME }}/.asdf/plugins/{{ item.name }}"
+  loop: "{{ asdf_tools }}"
+  become: no
+
+- name: Template asdf tool versions
+  template:
+    src: tool-versions.j2
+    dest: "{{ ansible_env.HOME }}/.tool-versions"
+
+- name: Install default tools
+  command: "{{ ansible_env.HOME }}/.asdf/bin/asdf install"
   become: no
 
 - name: Check if aws cli installed
@@ -116,3 +121,14 @@
       dest: /usr/local/bin/saml2aws
       mode: 0777
   when: not saml2aws.stat.exists
+
+
+- name: Get strongDM
+  get_url:
+    url: https://app.strongdm.com/releases/cli/linux
+    dest: /tmp/strongdm.zip
+
+- name: Unzip strongDM
+  unarchive:
+    src: /tmp/strongdm.zip
+    dest: /usr/local/bin

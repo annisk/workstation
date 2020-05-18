@@ -1,0 +1,4 @@
+{% for tool in asdf_tools %}
+{{ tool.name }} {{ tool.default_version }} {% for version in tool.additional_versions %}{{ version }} {% endfor %}
+
+{% endfor %}

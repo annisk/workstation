@@ -70,6 +70,12 @@
     - 19
   become: no
 
+- name: Disabled gTile on latest Fedora
+  command: gnome-extensions disable gTile@vibou
+  when: >
+    ansible_distribution == "Fedora" and
+    ansible_distribution_version == "32"
+
 - name: Set gnome settings
   become: no
   block:
@@ -81,7 +87,11 @@
     - name: Set dock favorites
       dconf:
         key: "/org/gnome/shell/favorite-apps"
-        value: "['google-chrome.desktop', 'org.gnome.Nautilus.desktop', 'org.kde.konsole.desktop', 'slack_slack.desktop', 'atom_atom.desktop', 'zeal.desktop', 'org.gnome.tweaks.desktop']"
+        value: "{{ item.value }}"
+      when: item.os == ansible_distribution
+      loop:
+        - { value: "['google-chrome.desktop', 'org.gnome.Nautilus.desktop', 'org.kde.konsole.desktop', 'slack_slack.desktop', 'atom_atom.desktop', 'zeal.desktop', 'spotify_spotify.desktop', 'virt-manager.desktop' ]", os: "Ubuntu" }
+        - { value: "['google-chrome.desktop', 'org.gnome.Nautilus.desktop', 'org.kde.konsole.desktop', 'slack.desktop', 'atom.desktop', 'org.zealdocs.Zeal.desktop', 'spotify_spotify.desktop', 'virt-manager.desktop']", os: "Fedora" }
 
     - name: Change caps to ctrl
       dconf:

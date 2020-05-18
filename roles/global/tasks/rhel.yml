@@ -37,6 +37,9 @@
       - gcc
       - lastpass-cli
       - unzip
+      - snapd
+      - "@virtualization"
+      - fzf
 
 - name: Install fedora only packages
   block:
@@ -48,6 +51,7 @@
         gpgkey: "{{ item.gpgkey }}"
       loop:
         - { name: "docker-ce-stable", baseurl: "https://download.docker.com/linux/fedora/31/$basearch/stable", gpgkey: "https://download.docker.com/linux/fedora/gpg" }
+        - { name: "Slack", baseurl: "https://packagecloud.io/slacktechnologies/slack/fedora/21/$basearch", gpgkey: "https://slack.com/gpg/slack_pubkey_2019.gpg" }
       when: ansible_distribution == 'Fedora'
 
     - name: Install fedora only packages
@@ -58,3 +62,14 @@
           - docker-ce-cli
           - containerd.io
           - zeal
+          - slack
+
+    - name: Install spotify
+      snap:
+        name: spotify
+
+    - name: Start libvirtd
+      systemd:
+        name: libvirtd
+        state: started
+        enabled: yes
